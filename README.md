@@ -1,0 +1,2 @@
+# proyectoPC
+Obligatorio Pensamiento Computacional
