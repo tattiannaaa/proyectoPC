@@ -1,0 +1,13 @@
+{
+  "libros": {
+    "123": {
+      "codigo": "123",
+      "titulo": "Mi Libro",
+      "autor": "Dross",
+      "año": 2016,
+      "genero": "Terror",
+      "estado": "DISPONIBLE"
+    }
+  },
+  "prestamos": []
+}

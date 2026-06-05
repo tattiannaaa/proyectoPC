@@ -1,62 +1,69 @@
-# Almacenamos todos los libros del sistema y cada libro es un diccionario con sus atributos
-libros = []
+# Modulo para gestionar los libros de la biblioteca.
+# Contiene funciones para registrar, listar y buscar libros.
 
-# Recibe los datos del libro y lo registra en el sistema
+from almacenamiento import cargar_datos, guardar_datos
+
+# Constantes para los estados posibles de un libro
+ESTADO_DISPONIBLE = "DISPONIBLE"
+ESTADO_PRESTADO = "PRESTADO"
+
 def registrar_libro(codigo, titulo, autor, año, genero):
     """
     Registra un nuevo libro en el sistema.
-    El estado inicial siempre es DISPONIBLE.
+    Si ya existe un libro con ese código, retorna un error.
     """
-    # Recorremos la lista para verificar que no exista un libro con el mismo código
-    for libro in libros:
-        if libro["codigo"] == codigo:
-            print("Error: Ya existe un libro con el código", codigo)
-            return
+    datos = cargar_datos()
+    libros = datos["libros"]
 
-    # Creamos el diccionario con los datos del libro
-    nuevo_libro = {
+    if codigo in libros:
+        return f"Error: Ya existe un libro con el código {codigo}."
+
+    if not año.isdigit():
+        return "Error: El año de publicación debe ser un número."
+
+    libros[codigo] = {
         "codigo": codigo,
         "titulo": titulo,
         "autor": autor,
-        "año": año,
+        "año": int(año),
         "genero": genero,
-        "estado": "DISPONIBLE"
+        "estado": ESTADO_DISPONIBLE,
     }
 
-    # Se agrega a la lista
-    libros.append(nuevo_libro)
-    print("Libro registrado con éxito.")
+    guardar_datos(datos)
+    return "Libro registrado con éxito."
 
-# Recorre la lista e imprime cada libro, si no se indica estado, lista todos
 def listar_libros(estado=None):
     """
     Lista los libros del sistema.
-    Si se indica un estado (DISPONIBLE o PRESTADO), filtra por ese estado.
-    Si no se indica estado, lista todos.
+    Si se pasa un estado (DISPONIBLE o PRESTADO), filtra por ese estado.
+    Si no se pasa estado, muestra todos.
     """
-    # Verifica que haya libros cargados
-    if len(libros) == 0:
-        print("No hay libros registrados.")
-        return
+    datos = cargar_datos()
+    libros = datos["libros"]
+    resultado = []
 
-    for libro in libros:
-        # Si se pidio filtrar por estado, salteamos los que no coinciden
-        if estado != None and libro["estado"] != estado:
-            continue
-        print("Código:", libro["codigo"],
-              "| Título:", libro["titulo"],
-              "| Autor:", libro["autor"],
-              "| Año:", libro["año"],
-              "| Género:", libro["genero"],
-              "| Estado:", libro["estado"])
+    for libro in libros.values():
+        if estado is None or libro["estado"] == estado:
+            resultado.append(_formatear_libro(libro))
+
+    if len(resultado) == 0:
+        return ["No hay libros para mostrar."]
+
+    return resultado
 
 def buscar_libro(codigo):
     """
     Busca un libro por su código y lo retorna.
-    Si no existe, retorna None.
+    Retorna el libro si lo encuentra, o None si no existe.
     """
-    for libro in libros:
-        if libro["codigo"] == codigo:
-            return libro
+    datos = cargar_datos()
+    libros = datos["libros"]
+    return libros.get(codigo)
 
-    return None
+def _formatear_libro(libro):
+    # Arma el texto que se muestra por pantalla para un libro
+    return (
+        f"{libro['codigo']} | {libro['titulo']} | {libro['autor']} | "
+        f"{libro['año']} | {libro['genero']} | {libro['estado']}"
+    )
